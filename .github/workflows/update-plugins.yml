@@ -1,0 +1,32 @@
+name: Update Plugins
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'   # toda segunda-feira às 9h UTC
+  workflow_dispatch:        # permite rodar manualmente pelo GitHub
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for new plugins
+        run: node update-plugins.js
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --staged --quiet; then
+            echo "Nenhum plugin novo."
+          else
+            COUNT=$(git diff --staged --unified=0 | grep "^+" | grep "name:'" | wc -l)
+            git commit -m "chore: adiciona $COUNT plugin(s) novo(s) do marketplace"
+            git push
+          fi
