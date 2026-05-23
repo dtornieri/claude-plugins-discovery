@@ -516,6 +516,97 @@ body{
 
 /* ── MAIN BOTTOM PADDING for fixed cart ── */
 #main{padding-bottom:42px}
+
+/* ── KIT BÁSICO ── */
+#kit-section{
+  margin:0;
+  padding:22px 32px 24px;
+  background:linear-gradient(160deg,#fffbeb 0%,#fef3c7 60%,#fde68a20 100%);
+  border-bottom:1.5px solid #fcd34d40;
+}
+.kit-eyebrow{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;
+  color:#92400e;letter-spacing:.14em;text-transform:uppercase;
+  background:#fef3c7;border:1.5px solid #fcd34d;
+  padding:3px 11px;border-radius:20px;margin-bottom:10px;
+}
+.kit-header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:14px;flex-wrap:wrap;gap:8px;
+}
+.kit-title-wrap{display:flex;flex-direction:column;gap:3px}
+.kit-title{
+  font-size:15px;font-weight:700;color:#78350f;
+  font-family:'Syne',sans-serif;
+}
+.kit-desc{font-size:12px;color:#92400e;font-family:'DM Sans',sans-serif;}
+.kit-add-all-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:#f59e0b;border:none;color:#fff;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  padding:8px 18px;border-radius:9px;cursor:pointer;
+  transition:all .15s;letter-spacing:.02em;white-space:nowrap;flex-shrink:0;
+}
+.kit-add-all-btn:hover{background:#d97706;transform:translateY(-1px)}
+.kit-add-all-btn.all-added{background:#16a34a;cursor:default;transform:none}
+.kit-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:10px;
+}
+.kit-card{
+  background:#fff;
+  border:1.5px solid #fcd34d60;
+  border-radius:12px;
+  padding:14px 16px;
+  display:flex;flex-direction:column;gap:8px;
+  position:relative;
+  border-left:4px solid #f59e0b;
+  transition:box-shadow .2s,transform .2s;
+}
+.kit-card:hover{
+  box-shadow:0 6px 20px rgba(245,158,11,.15);
+  transform:translateY(-1px);
+}
+.kit-card.in-cart{
+  background:linear-gradient(135deg,#f0fdf4,#dcfce7);
+  border-color:#86efac;
+  border-left-color:#22c55e;
+}
+.kit-card-top{display:flex;align-items:center;gap:10px}
+.kit-card-icon{
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;
+  background:#fef3c7;
+}
+.kit-card-name{
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  color:#78350f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  flex:1;min-width:0;
+}
+.kit-card-desc{
+  font-size:12px;color:#92400e;line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.kit-add-btn{
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  background:#fef3c7;border:1.5px solid #fcd34d;
+  color:#92400e;cursor:pointer;
+  padding:5px 10px;border-radius:7px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+  transition:all .15s;letter-spacing:.02em;width:100%;
+}
+.kit-add-btn:hover{background:#fde68a;border-color:#f59e0b}
+.kit-add-btn.in-cart{
+  background:#dcfce7;border-color:#86efac;color:#15803d;cursor:pointer;
+}
+.kit-add-btn.in-cart:hover{background:#fee2e2;border-color:#fca5a5;color:#dc2626}
+@media(max-width:900px){
+  #kit-section{padding:16px}
+  .kit-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+}
 </style>
 </head>
 <body>
@@ -580,6 +671,7 @@ body{
     </div>
   </div>
 
+  <div id="kit-section" style="display:none"></div>
   <div id="content"></div>
 
   <div id="empty">
@@ -900,6 +992,12 @@ const TR = {
     update_new:(n,name)=>`✨ ${n} novo${n>1?'s':''} plugin${n>1?'s':''}! Rolando até ${name}…`,
     update_err:msg=>`⚠ Erro ao buscar: ${msg}`,
     last_checked:ts=>`Última verificação no GitHub: ${ts}`,
+    kit_eyebrow:'★ Kit Básico',
+    kit_title:'Comece por aqui',
+    kit_desc:'6 plugins essenciais para qualquer dev — do core ao workflow git.',
+    kit_add_all:'+ Adicionar todos ao carrinho',
+    kit_all_added:'✓ Todos adicionados!',
+    kit_add:'+ adicionar', kit_added:'✓ adicionado',
     modal_title:'Selecione tudo e copie',
     modal_hint:'O clipboard automático não está disponível em <code style="background:#f0f4ff;padding:2px 6px;border-radius:4px">file://</code>. Selecione o texto abaixo (Ctrl+A) e copie (Ctrl+C).',
     modal_close:'Fechar', modal_copy:'Copiar',
@@ -949,6 +1047,12 @@ const TR = {
     update_new:(n,name)=>`✨ ${n} new plugin${n>1?'s':''}! Scrolling to ${name}…`,
     update_err:msg=>`⚠ Fetch error: ${msg}`,
     last_checked:ts=>`Last checked on GitHub: ${ts}`,
+    kit_eyebrow:'★ Starter Kit',
+    kit_title:'Start here',
+    kit_desc:'6 essential plugins for any dev — from core features to git workflow.',
+    kit_add_all:'+ Add all to cart',
+    kit_all_added:'✓ All added!',
+    kit_add:'+ add', kit_added:'✓ added',
     modal_title:'Select all and copy',
     modal_hint:'Auto clipboard is not available on <code style="background:#f0f4ff;padding:2px 6px;border-radius:4px">file://</code>. Select the text below (Ctrl+A) and copy (Ctrl+C).',
     modal_close:'Close', modal_copy:'Copy',
@@ -1080,6 +1184,22 @@ function toggleCart(name){
       btn.textContent=cart.has(name)?'✓ adicionado':'+ adicionar';
     }
   }
+  // update kit card if this plugin is in the kit
+  if(KIT_PLUGINS.includes(name)){
+    const kc=document.querySelector(`.kit-card[data-kit="${name}"]`);
+    if(kc){
+      kc.classList.toggle('in-cart',cart.has(name));
+      const kb=kc.querySelector('.kit-add-btn');
+      if(kb){kb.classList.toggle('in-cart',cart.has(name));kb.textContent=cart.has(name)?t('kit_added'):t('kit_add');}
+    }
+    const allBtn=document.getElementById('kit-add-all-btn');
+    if(allBtn){
+      const allIn=KIT_PLUGINS.every(n=>cart.has(n));
+      allBtn.textContent=allIn?t('kit_all_added'):t('kit_add_all');
+      allBtn.classList.toggle('all-added',allIn);
+      allBtn.disabled=allIn;
+    }
+  }
   updateCartPanel();
 }
 
@@ -1116,6 +1236,11 @@ function clearCart(){
     }
   });
   cart.clear();
+  // reset kit cards
+  document.querySelectorAll('.kit-card').forEach(kc=>{kc.classList.remove('in-cart');});
+  document.querySelectorAll('.kit-add-btn').forEach(kb=>{kb.classList.remove('in-cart');kb.textContent=t('kit_add');});
+  const allBtn=document.getElementById('kit-add-all-btn');
+  if(allBtn){allBtn.textContent=t('kit_add_all');allBtn.classList.remove('all-added');allBtn.disabled=false;}
   updateCartPanel();
 }
 
@@ -1166,6 +1291,51 @@ function showFallback(cmds){
   const ta=document.getElementById('copy-modal-ta');
   ta.value=cmds;
   setTimeout(()=>{ta.focus();ta.select();},50);
+}
+
+// ── KIT BÁSICO ──
+const KIT_PLUGINS = ['superpowers','code-review','context7','github','security-guidance','commit-commands'];
+
+function renderKitBasico(){
+  const sec=document.getElementById('kit-section');
+  if(!sec)return;
+  const allInCart=KIT_PLUGINS.every(n=>cart.has(n));
+  sec.style.display='';
+  sec.innerHTML=`
+    <div class="kit-eyebrow">${t('kit_eyebrow')}</div>
+    <div class="kit-header">
+      <div class="kit-title-wrap">
+        <div class="kit-title">${t('kit_title')}</div>
+        <div class="kit-desc">${t('kit_desc')}</div>
+      </div>
+      <button class="kit-add-all-btn${allInCart?' all-added':''}" id="kit-add-all-btn" onclick="addAllKit()" ${allInCart?'disabled':''}>
+        ${allInCart?t('kit_all_added'):t('kit_add_all')}
+      </button>
+    </div>
+    <div class="kit-grid">
+      ${KIT_PLUGINS.map(name=>{
+        const p=PLUGINS.find(x=>x.name===name);
+        if(!p)return'';
+        const inCart=cart.has(name);
+        return`<div class="kit-card${inCart?' in-cart':''}" data-kit="${name}">
+          <div class="kit-card-top">
+            <div class="kit-card-icon">${p.icon}</div>
+            <div class="kit-card-name">${name}</div>
+          </div>
+          <div class="kit-card-desc">${p.desc}</div>
+          <button class="kit-add-btn${inCart?' in-cart':''}" onclick="toggleCart('${name}')" data-kit-btn="${name}">
+            ${inCart?t('kit_added'):t('kit_add')}
+          </button>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function addAllKit(){
+  KIT_PLUGINS.forEach(name=>{
+    if(!cart.has(name)) toggleCart(name);
+  });
+  renderKitBasico();
 }
 
 function applyCartState(){
@@ -1230,6 +1400,10 @@ function render(){
   document.getElementById('total-badge').textContent=`${PLUGINS.length} plugins`;
   const statEl=document.getElementById('stat-total');
   if(statEl)statEl.textContent=PLUGINS.length;
+  // show/hide kit section
+  const kitSec=document.getElementById('kit-section');
+  if(currentCategory==='all'&&!q){renderKitBasico();}
+  else if(kitSec){kitSec.style.display='none';}
   if(!filtered.length){content.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   if(currentCategory==='all'&&!q){
