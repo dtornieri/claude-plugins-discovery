@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Plugin Discovery — 203 Plugins</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#eef1fb;
+  --sidebar:#ffffff;
+  --card:#ffffff;
+  --card2:#f7f9ff;
+  --border:#dde3f4;
+  --text:#1a2040;
+  --muted:#7080a8;
+  --light:#a8b4d0;
+  --accent:#4f6ef7;
+  --sidebar-w:272px;
+  --radius:14px;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  display:flex;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── SIDEBAR ── */
+#sidebar{
+  width:var(--sidebar-w);
+  min-height:100vh;
+  background:var(--sidebar);
+  border-right:1px solid var(--border);
+  position:fixed;left:0;top:0;bottom:0;
+  overflow-y:auto;overflow-x:hidden;
+  z-index:10;
+  display:flex;flex-direction:column;
+  scrollbar-width:thin;
+  scrollbar-color:#dde3f4 transparent;
+}
+#sidebar::-webkit-scrollbar{width:4px}
+#sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+.sidebar-header{
+  padding:26px 20px 18px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,#f8f9ff 0%,#fff 100%);
+}
+.sidebar-logo{
+  font-size:10px;font-family:'JetBrains Mono',monospace;
+  color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;
+}
+.sidebar-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.2}
+.sidebar-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:10px;font-size:10px;font-family:'JetBrains Mono',monospace;
+  color:var(--accent);background:#4f6ef710;border:1px solid #4f6ef720;
+  padding:3px 10px;border-radius:20px;
+}
+
+.sidebar-search{padding:14px 14px 0}
+.sidebar-search input{
+  width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
+  padding:9px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;
+  font-size:12px;outline:none;transition:border-color .2s;
+}
+.sidebar-search input:focus{border-color:#4f6ef760;background:#fff}
+.sidebar-search input::placeholder{color:var(--light)}
+
+.sidebar-nav{padding:10px 0 28px}
+.nav-section{
+  padding:12px 18px 4px;font-size:9px;font-family:'JetBrains Mono',monospace;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--light);font-weight:500;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 18px;cursor:pointer;border-left:3px solid transparent;
+  transition:all .15s;text-decoration:none;color:var(--muted);
+  font-size:13.5px;font-weight:500;
+}
+.nav-item:hover{color:var(--text);background:#f0f4ff}
+.nav-item.active{color:var(--text);background:#f0f4ff;border-left-color:currentColor}
+.nav-icon{font-size:14px;flex-shrink:0;width:20px;text-align:center}
+.nav-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-count{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  padding:2px 7px;border-radius:10px;background:var(--bg);
+  border:1px solid var(--border);color:var(--muted);flex-shrink:0;
+}
+
+/* ── MAIN ── */
+#main{margin-left:var(--sidebar-w);flex:1;min-height:100vh}
+
+/* ── TOPBAR ── */
+#topbar{
+  position:sticky;top:0;
+  background:rgba(238,241,251,.92);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:14px 32px;display:flex;align-items:center;gap:14px;z-index:5;
+}
+#topbar h1{
+  font-size:13px;font-weight:500;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;letter-spacing:.02em;white-space:nowrap;
+}
+#topbar h1 span{color:var(--text)}
+.topbar-spacer{flex:1}
+.result-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap}
+.sort-select{
+  background:#fff;border:1.5px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;
+  padding:6px 10px;outline:none;cursor:pointer;
+}
+#update-btn{
+  display:flex;align-items:center;gap:6px;
+  background:#fff;border:1.5px solid var(--border);border-radius:8px;
+  color:var(--muted);cursor:pointer;padding:6px 14px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  transition:all .2s;white-space:nowrap;
+}
+#update-btn:hover{color:var(--accent);border-color:#4f6ef740;background:#f0f4ff}
+#update-btn.loading{opacity:.6;pointer-events:none}
+#update-btn.ok{color:#22c55e;border-color:#bbf7d0;background:#f0fdf4}
+.spin{display:inline-block;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── HERO ── */
+#hero{
+  padding:44px 36px 32px;
+  background:linear-gradient(160deg,#ffffff 0%,#f0f4ff 60%,#e8eeff 100%);
+  border-bottom:1px solid var(--border);
+  margin-bottom:0;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);
+  letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;
+  background:#4f6ef710;border:1px solid #4f6ef720;padding:4px 12px;border-radius:20px;
+}
+.hero-title{
+  font-size:40px;font-weight:800;line-height:1.1;
+  background:linear-gradient(135deg,#1a2040 0%,#4f6ef7 60%,#7c3aed 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:10px;
+}
+.hero-sub{font-size:15px;font-weight:400;color:var(--muted);max-width:560px;line-height:1.7;margin-bottom:28px}
+.hero-stats{
+  display:flex;gap:0;
+  background:#fff;border:1.5px solid var(--border);border-radius:16px;
+  width:fit-content;overflow:hidden;
+}
+.stat{
+  padding:16px 28px;text-align:center;
+  border-right:1px solid var(--border);
+}
+.stat:last-child{border-right:none}
+.stat-num{font-size:24px;font-weight:700;color:var(--text);font-family:'DM Sans',sans-serif}
+.stat-lbl{font-size:11px;color:var(--muted);font-weight:500;margin-top:2px}
+.last-updated{
+  margin-top:14px;font-size:11px;color:var(--light);
+  font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:6px;
+}
+
+/* ── CONTENT ── */
+#content{padding:28px 32px 60px}
+
+/* ── CATEGORY SECTION ── */
+.cat-section{margin-bottom:52px}
+.cat-header{
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:18px;padding-bottom:14px;border-bottom:1.5px solid var(--border);
+}
+.cat-icon-wrap{
+  width:42px;height:42px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+}
+.cat-name{font-size:17px;font-weight:700;color:var(--text);font-family:'Syne',sans-serif}
+.cat-desc{font-size:12px;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace}
+.cat-pill{
+  margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;
+  padding:4px 12px;border-radius:20px;border:1.5px solid;flex-shrink:0;font-weight:600;
+}
+
+/* ── GRID ── */
+.plugin-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:14px;
+}
+
+/* ── CARD ── */
+.plugin-card{
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+  display:flex;flex-direction:column;gap:14px;
+  transition:box-shadow .2s,transform .2s,border-color .2s;
+  position:relative;overflow:hidden;
+  border-left:4px solid var(--cat-color,#dde3f4);
+}
+.plugin-card:hover{
+  box-shadow:0 8px 32px rgba(79,110,247,.1),0 2px 8px rgba(0,0,0,.06);
+  transform:translateY(-2px);
+  border-color:var(--cat-color,#dde3f4);
+  border-left-color:var(--cat-color,#dde3f4);
+}
+.card-top{display:flex;align-items:flex-start;gap:12px}
+.card-icon{
+  width:38px;height:38px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;flex-shrink:0;
+}
+.card-meta{flex:1;min-width:0}
+.card-name{
+  font-size:13px;font-weight:600;color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.card-installs{
+  font-size:11px;color:var(--muted);margin-top:4px;
+}
+.card-installs b{color:#16a34a;font-weight:600}
+.card-desc{
+  font-size:13.5px;color:var(--muted);line-height:1.65;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+
+/* ── INSTALL BLOCK ── */
+.install-block{
+  background:#1a2040;
+  border-radius:10px;
+  overflow:hidden;
+  border:1.5px solid #2d3a5a;
+}
+.install-top{
+  display:flex;align-items:center;gap:0;
+}
+.terminal-dots{
+  display:flex;gap:5px;padding:8px 12px;flex-shrink:0;
+}
+.dot{width:8px;height:8px;border-radius:50%}
+.dot.r{background:#ff5f57}
+.dot.y{background:#febc2e}
+.dot.g{background:#28c840}
+.install-cmd-wrap{
+  flex:1;min-width:0;
+  padding:8px 0;
+  display:flex;align-items:center;gap:6px;
+  overflow:hidden;
+}
+.terminal-prompt{
+  color:#4f6ef7;font-family:'JetBrains Mono',monospace;font-size:12px;
+  flex-shrink:0;user-select:none;
+}
+.install-cmd{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:#a8c4ff;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;
+}
+.copy-btn{
+  display:flex;align-items:center;gap:6px;
+  background:#4f6ef7;border:none;
+  color:#fff;cursor:pointer;
+  padding:0 16px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+  height:100%;min-height:34px;flex-shrink:0;
+  transition:all .15s;letter-spacing:.02em;
+}
+.copy-btn:hover{background:#3d5ae0}
+.copy-btn.copied{background:#22c55e}
+
+.install-hint{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:#4a5a7a;padding:6px 12px;
+  border-top:1px solid #2d3a5a;
+  display:flex;align-items:center;gap:6px;
+}
+.install-hint.success{color:#4ade80;background:#0a200e}
+
+/* ── BADGES ── */
+.installed-badge{
+  position:absolute;top:14px;right:14px;
+  font-size:9px;font-family:'JetBrains Mono',monospace;
+  background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;
+  padding:2px 8px;border-radius:10px;letter-spacing:.06em;font-weight:600;
+}
+.new-pill{
+  display:inline-block;font-size:9px;font-family:'JetBrains Mono',monospace;font-weight:700;
+  background:#4f46e5;color:#fff;border:none;
+  padding:2px 7px;border-radius:6px;margin-left:7px;vertical-align:middle;
+  letter-spacing:.04em;
+}
+.cat-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-family:'JetBrains Mono',monospace;
+  padding:3px 10px;border-radius:8px;border:1.5px solid;font-weight:600;
+  width:fit-content;
+}
+
+/* ── EMPTY ── */
+#empty{
+  display:none;text-align:center;padding:80px 32px;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;
+}
+#empty .e-icon{font-size:44px;margin-bottom:16px}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:28px;right:28px;
+  background:#1a2040;color:#fff;
+  border-radius:12px;padding:14px 20px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  z-index:200;opacity:0;transform:translateY(8px);
+  transition:all .3s;pointer-events:none;max-width:320px;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.new{background:#4f46e5;color:#e0e7ff}
+
+/* ── SIDEBAR CREDIT ── */
+.sidebar-credit{
+  margin-top:auto;
+  padding:16px 18px;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,#f8f9ff,#fff);
+}
+.credit-avatar{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,#4f6ef7,#7c3aed);
+  color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:12px;
+  display:flex;align-items:center;justify-content:center;letter-spacing:.02em;
+}
+.credit-info{display:flex;flex-direction:column;gap:4px;min-width:0}
+.credit-name{
+  font-size:12px;font-weight:700;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.credit-link{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:#0a66c2;text-decoration:none;font-weight:500;
+  transition:opacity .15s;
+}
+.credit-link:hover{opacity:.75;text-decoration:underline}
+.credit-link svg{flex-shrink:0}
+
+/* ── PAGE FOOTER ── */
+#page-footer{
+  padding:28px 32px 36px;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;
+  background:linear-gradient(135deg,#f8f9ff,#fff);
+  margin-top:8px;
+}
+.footer-avatar{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,#4f6ef7,#7c3aed);
+  color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:14px;
+  display:flex;align-items:center;justify-content:center;letter-spacing:.02em;
+}
+.footer-info{flex:1;min-width:0}
+.footer-by{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--light);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;
+}
+.footer-name{font-size:15px;font-weight:800;color:var(--text)}
+.footer-link{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:#0a66c2;text-decoration:none;font-weight:500;margin-top:4px;
+  transition:opacity .15s;
+}
+.footer-link:hover{opacity:.75;text-decoration:underline}
+.footer-sep{color:var(--border);font-size:20px;user-select:none}
+.footer-built{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--light);text-align:right;line-height:1.7;
+}
+.footer-built b{color:var(--muted)}
+
+/* ── LANG TOGGLE ── */
+.lang-toggle{
+  display:flex;border:1.5px solid var(--border);border-radius:8px;
+  overflow:hidden;flex-shrink:0;
+}
+.lang-btn{
+  background:#fff;border:none;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+  color:var(--muted);padding:5px 11px;transition:all .15s;
+}
+.lang-btn.active{background:var(--accent);color:#fff}
+.lang-btn:hover:not(.active){background:#f0f4ff;color:var(--accent)}
+
+/* ── TOP BTN ── */
+#top-btn{
+  position:fixed;bottom:28px;left:calc(var(--sidebar-w) + 20px);
+  background:#fff;border:1.5px solid var(--border);border-radius:10px;
+  color:var(--muted);cursor:pointer;padding:10px 14px;font-size:16px;
+  opacity:0;pointer-events:none;transition:all .25s;z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+}
+#top-btn.visible{opacity:1;pointer-events:all}
+#top-btn:hover{color:var(--accent);border-color:#4f6ef740}
+
+@media(max-width:900px){
+  #sidebar{display:none}
+  #main{margin-left:0}
+  .plugin-grid{grid-template-columns:1fr}
+  .hero-title{font-size:28px}
+  #top-btn{left:20px}
+  #cart-panel{left:0}
+}
+
+/* ── HERO CREDIT ── */
+.hero-credit{
+  margin-top:14px;
+  font-size:13px;color:var(--muted);
+}
+.hero-credit strong{color:var(--text);font-weight:600}
+.hero-credit a{
+  color:#0a66c2;text-decoration:none;font-weight:500;
+}
+.hero-credit a:hover{text-decoration:underline}
+
+/* ── CART PANEL ── */
+#cart-panel{
+  position:fixed;bottom:0;
+  left:var(--sidebar-w);right:0;
+  background:rgba(255,255,255,.95);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);
+  z-index:60;
+  box-shadow:0 -2px 16px rgba(79,110,247,.08);
+}
+.cart-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 20px;height:40px;
+}
+.cart-prompt{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--accent);flex-shrink:0;user-select:none;font-weight:600;
+}
+.cart-status{
+  font-size:12px;color:var(--light);flex-shrink:0;white-space:nowrap;
+}
+.cart-chips{
+  display:flex;gap:4px;flex:1;
+  overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:none;
+}
+.cart-chips::-webkit-scrollbar{display:none}
+.cart-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#f0f4ff;border:1px solid #c7d4fd;
+  border-radius:6px;padding:2px 5px 2px 8px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);
+  white-space:nowrap;flex-shrink:0;
+}
+.cart-chip-x{
+  background:none;border:none;color:#a8b4d0;cursor:pointer;
+  font-size:14px;line-height:1;padding:0;
+  transition:color .12s;flex-shrink:0;
+}
+.cart-chip-x:hover{color:#ef4444}
+.cart-count-badge{
+  flex-shrink:0;
+  background:var(--accent);color:#fff;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:20px;white-space:nowrap;
+}
+.cart-clear-btn{
+  background:none;border:none;color:var(--light);cursor:pointer;
+  font-size:12px;padding:4px 6px;transition:color .12s;
+  white-space:nowrap;flex-shrink:0;
+}
+.cart-clear-btn:hover{color:#ef4444}
+.cart-copy-btn{
+  display:flex;align-items:center;gap:6px;
+  background:var(--accent);border:none;color:#fff;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+  padding:5px 14px;border-radius:7px;cursor:pointer;
+  transition:background .15s;flex-shrink:0;white-space:nowrap;
+}
+.cart-copy-btn:hover{background:#3d5ae0}
+.cart-copy-btn.copied{background:#16a34a}
+
+/* ── IN-CART CARD STATE ── */
+.plugin-card.in-cart{
+  border-left-width:4px !important;
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--cat-color,#4f6ef7) 25%, transparent),
+             0 8px 32px rgba(79,110,247,.1);
+  background:linear-gradient(135deg,#f8faff 0%,#f0f5ff 100%);
+}
+
+/* ── ADD BUTTON (inside dark terminal block) ── */
+.add-btn{
+  display:flex;align-items:center;gap:5px;
+  background:#1e2d4a;border:none;border-left:1px solid #2d3a5a;
+  color:#5a7aaa;cursor:pointer;
+  padding:0 16px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+  height:100%;min-height:34px;flex-shrink:0;
+  transition:all .15s;letter-spacing:.02em;white-space:nowrap;
+}
+.add-btn:hover{background:#4f6ef7;color:#fff}
+.add-btn.in-cart{background:#15803d;color:#86efac;border-left-color:#166534}
+.add-btn.in-cart:hover{background:#dc2626;color:#fca5a5;border-left-color:#991b1b}
+
+/* ── MAIN BOTTOM PADDING for fixed cart ── */
+#main{padding-bottom:42px}
+</style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">claude-plugins-official</div>
+    <div class="sidebar-title">Plugin Discovery</div>
+    <div class="sidebar-badge">
+      <span>◆</span>
+      <span id="total-badge">203 plugins</span>
+    </div>
+  </div>
+  <div class="sidebar-search">
+    <input type="text" id="search-input" placeholder="buscar plugins..." autocomplete="off" spellcheck="false">
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+</aside>
+
+<div id="main">
+  <div id="topbar">
+    <h1>claude / <span>plugins</span></h1>
+    <div class="topbar-spacer"></div>
+    <span class="result-count" id="result-count">203 plugins</span>
+    <select class="sort-select" id="sort-select">
+      <option value="installs">↓ popularidade</option>
+      <option value="alpha">A → Z</option>
+    </select>
+    <button id="update-btn" onclick="updateFromGitHub()">
+      <span id="update-icon">↻</span> <span id="update-btn-label">Verificar novos</span>
+    </button>
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="pt" onclick="setLang('pt')">PT</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+
+  <div id="hero">
+    <div class="hero-eyebrow">◆ claude-plugins-official · marketplace</div>
+    <h2 class="hero-title">Plugin Discovery</h2>
+    <p class="hero-sub">203 plugins oficiais para o Claude Code. Clique em <strong>+ adicionar</strong> nos plugins desejados, monte sua fila e copie todos os comandos de uma vez.</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num" id="stat-total">203</div>
+        <div class="stat-lbl">Plugins</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">20</div>
+        <div class="stat-lbl">Categorias</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">2</div>
+        <div class="stat-lbl">Instalados</div>
+      </div>
+    </div>
+    <div class="hero-credit">
+      Curado por <strong>Daniel Tornieri</strong> ·
+      <a href="https://www.linkedin.com/in/daniel-tornieri-09639813/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+    <div id="last-updated-bar" class="last-updated" style="display:none">
+      <span>🕐</span><span id="last-updated-text"></span>
+    </div>
+  </div>
+
+  <div id="content"></div>
+
+  <div id="empty">
+    <div class="e-icon">🔍</div>
+    <p>Nenhum plugin encontrado.</p>
+  </div>
+</div>
+
+<button id="top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<div class="toast" id="toast"></div>
+
+<!-- ── CART PANEL ── -->
+<div id="cart-panel">
+  <div class="cart-bar">
+    <span class="cart-prompt">$</span>
+    <span class="cart-status" id="cart-status">nenhum plugin selecionado</span>
+    <div class="cart-chips" id="cart-chips"></div>
+    <span class="cart-count-badge" id="cart-count-badge" style="display:none">0</span>
+    <button class="cart-clear-btn" id="cart-clear-btn" onclick="clearCart()" style="display:none">limpar</button>
+    <button class="cart-copy-btn" id="cart-copy-btn" onclick="copyCart()" style="display:none">📋 copiar tudo</button>
+  </div>
+</div>
+
+<script>
+const INSTALLED = ['frontend-design','pyright-lsp'];
+const MARKETPLACE_URL = 'https://raw.githubusercontent.com/anthropics/claude-plugins-official/main/.claude-plugin/marketplace.json';
+
+const CATEGORIES = [
+  {id:'core',    name:'Claude Code Core',         icon:'⚡', color:'#f59e0b'},
+  {id:'lsp',     name:'Language Servers',          icon:'🔤', color:'#3b82f6'},
+  {id:'testing', name:'Browser & Testing',         icon:'🧪', color:'#10b981'},
+  {id:'devops',  name:'Version Control & DevOps',  icon:'🔄', color:'#8b5cf6'},
+  {id:'cloud',   name:'Cloud & Deployment',        icon:'☁️', color:'#06b6d4'},
+  {id:'database',name:'Databases & Storage',       icon:'🗄️', color:'#f97316'},
+  {id:'security',name:'Security',                  icon:'🛡️', color:'#ef4444'},
+  {id:'design',  name:'Design & Media',            icon:'🎨', color:'#ec4899'},
+  {id:'analytics',name:'Analytics & Observability',icon:'📊', color:'#8b5cf6'},
+  {id:'comms',   name:'Communication',             icon:'💬', color:'#14b8a6'},
+  {id:'pm',      name:'Project Management',        icon:'📋', color:'#eab308'},
+  {id:'payments',name:'Payments & Fintech',        icon:'💳', color:'#22c55e'},
+  {id:'ai',      name:'AI & Machine Learning',     icon:'🤖', color:'#a855f7'},
+  {id:'webdata', name:'APIs & Web Data',           icon:'🌐', color:'#0ea5e9'},
+  {id:'enterprise',name:'Enterprise Platforms',    icon:'🏢', color:'#64748b'},
+  {id:'ecommerce',name:'E-commerce & CMS',         icon:'🛒', color:'#f43f5e'},
+  {id:'auth',    name:'Auth & Identity',           icon:'🔐', color:'#84cc16'},
+  {id:'mobile',  name:'Mobile & Frameworks',       icon:'📱', color:'#f59e0b'},
+  {id:'dataeng', name:'Data Engineering',          icon:'⛏️', color:'#38bdf8'},
+  {id:'utils',   name:'Dev Utilities',             icon:'🛠️', color:'#94a3b8'},
+];
+
+const PLUGINS = [
+  // ── CORE ──
+  {name:'superpowers',cat:'core',installs:713185,icon:'⚡',desc:'Ensina brainstorming, desenvolvimento com subagentes, revisão de código integrada, TDD red/green e como criar novas skills.'},
+  {name:'code-review',cat:'core',installs:333535,icon:'🔍',desc:'Revisão automática de PRs usando múltiplos agentes especializados com scoring baseado em confiança para filtrar falsos positivos.'},
+  {name:'code-simplifier',cat:'core',installs:273543,icon:'✂️',desc:'Agente que simplifica e refina código para clareza, consistência e manutenibilidade preservando a funcionalidade.'},
+  {name:'skill-creator',cat:'core',installs:268237,icon:'🎯',desc:'Cria novas skills, melhora skills existentes e mede performance. Use para criar do zero, otimizar ou benchmarkar skills.'},
+  {name:'claude-md-management',cat:'core',installs:213170,icon:'📝',desc:'Ferramentas para manter e melhorar arquivos CLAUDE.md — auditoria de qualidade, captura de aprendizados e memória do projeto.'},
+  {name:'feature-dev',cat:'core',installs:211361,icon:'🚀',desc:'Workflow completo de desenvolvimento de features com agentes especializados em exploração de codebase, design de arquitetura e revisão de qualidade.'},
+  {name:'ralph-loop',cat:'core',installs:171129,icon:'🔁',desc:'Loops interativos de IA auto-referencial para desenvolvimento iterativo. Claude trabalha na mesma tarefa repetidamente vendo o próprio trabalho anterior.'},
+  {name:'commit-commands',cat:'core',installs:141037,icon:'📦',desc:'Comandos para workflows de commit git incluindo commit, push e criação de PR.'},
+  {name:'claude-code-setup',cat:'core',installs:134609,icon:'🔧',desc:'Analisa codebases e recomenda automações personalizadas: hooks, skills, servidores MCP e subagentes.'},
+  {name:'pr-review-toolkit',cat:'core',installs:93829,icon:'🔬',desc:'Agentes de revisão de PR especializados em comentários, testes, tratamento de erros, design de tipos e qualidade de código.'},
+  {name:'agent-sdk-dev',cat:'core',installs:57027,icon:'🤝',desc:'Kit de desenvolvimento para trabalhar com o Claude Agent SDK.'},
+  {name:'plugin-dev',cat:'core',installs:55797,icon:'🔩',desc:'Toolkit completo para desenvolver plugins do Claude Code com 7 skills cobrindo hooks, MCP, comandos, agentes e boas práticas.'},
+  {name:'explanatory-output-style',cat:'core',installs:54683,icon:'💡',desc:'Adiciona insights educacionais sobre escolhas de implementação e padrões do codebase.'},
+  {name:'hookify',cat:'core',installs:49405,icon:'🪝',desc:'Cria hooks customizados para prevenir comportamentos indesejados. Defina regras via arquivos markdown simples.'},
+  {name:'playground',cat:'core',installs:49784,icon:'🎮',desc:'Cria playgrounds HTML interativos — exploradores com controles visuais, preview ao vivo e saída com botão de cópia.'},
+  {name:'learning-output-style',cat:'core',installs:35532,icon:'📚',desc:'Modo de aprendizado interativo que solicita contribuições de código em pontos de decisão chave.'},
+  {name:'remember',cat:'core',installs:28582,icon:'🧠',desc:'Memória contínua para o Claude Code. Extrai, resume e comprime conversas em logs diários. Claude lembra o que você fez ontem.'},
+  {name:'mcp-server-dev',cat:'core',installs:15813,icon:'🔌',desc:'Skills para projetar e construir servidores MCP. Cobre modelos de deploy, padrões de ferramentas, auth e MCP apps interativos.'},
+  {name:'session-report',cat:'core',installs:5697,icon:'📈',desc:'Gera relatório HTML explorável do uso da sessão — tokens, eficiência de cache, subagentes, skills e prompts mais caros.'},
+  {name:'math-olympiad',cat:'core',installs:2029,icon:'🔢',desc:'Resolve problemas de matemática de competição (IMO, Putnam, USAMO) com verificação adversarial que detecta falhas que a auto-verificação perde.'},
+  {name:'code-modernization',cat:'core',installs:1530,icon:'🔄',desc:'Moderniza codebases legados (COBOL, Java/C++ legado, monolitos web) com workflow assess/map/transform/harden e agentes revisores.'},
+  {name:'mcp-apps',cat:'core',installs:59,icon:'📱',desc:'Skills para criar MCP Apps com o MCP Apps SDK.'},
+  {name:'mcp-tunnels',cat:'core',installs:0,icon:'🚇',desc:'Conecta Claude a um servidor MCP privado via tunnel Anthropic. O comando /create-docker-mcp-tunnel automatiza o quickstart Docker Compose.'},
+
+  // ── LSP ──
+  {name:'typescript-lsp',cat:'lsp',installs:171531,icon:'🔵',desc:'Language server TypeScript/JavaScript para inteligência de código aprimorada com autocompletion, tipos e refatoração.'},
+  {name:'pyright-lsp',cat:'lsp',installs:0,icon:'🐍',desc:'Language server Python (Pyright) para análise de tipos estática e inteligência de código.'},
+  {name:'clangd-lsp',cat:'lsp',installs:23789,icon:'⚙️',desc:'Language server C/C++ (clangd) para inteligência de código completa.'},
+  {name:'csharp-lsp',cat:'lsp',installs:34840,icon:'🟣',desc:'Language server C# para inteligência de código.'},
+  {name:'gopls-lsp',cat:'lsp',installs:34007,icon:'🐹',desc:'Language server Go para inteligência de código e refatoração.'},
+  {name:'rust-analyzer-lsp',cat:'lsp',installs:29275,icon:'🦀',desc:'Language server Rust para inteligência de código e análise estática.'},
+  {name:'jdtls-lsp',cat:'lsp',installs:26854,icon:'☕',desc:'Language server Java (Eclipse JDT.LS) para inteligência de código.'},
+  {name:'php-lsp',cat:'lsp',installs:26686,icon:'🐘',desc:'Language server PHP (Intelephense) para inteligência de código.'},
+  {name:'kotlin-lsp',cat:'lsp',installs:19274,icon:'🅺',desc:'Language server Kotlin para inteligência de código.'},
+  {name:'swift-lsp',cat:'lsp',installs:19252,icon:'🦅',desc:'Language server Swift (SourceKit-LSP) para inteligência de código.'},
+  {name:'lua-lsp',cat:'lsp',installs:13044,icon:'🌙',desc:'Language server Lua para inteligência de código.'},
+  {name:'ruby-lsp',cat:'lsp',installs:6646,icon:'💎',desc:'Language server Ruby para inteligência e análise de código.'},
+  {name:'liquid-lsp',cat:'lsp',installs:754,icon:'💧',desc:'Integração LSP para templates Shopify Liquid via language server do Shopify CLI.'},
+
+  // ── TESTING ──
+  {name:'playwright',cat:'testing',installs:238220,icon:'🎭',desc:'Servidor MCP de automação de browser e testes E2E da Microsoft. Interage com páginas, tira screenshots, preenche formulários e clica elementos.'},
+  {name:'chrome-devtools-mcp',cat:'testing',installs:64569,icon:'🔎',desc:'Controla e inspeciona um Chrome ao vivo. Grava traces de performance, analisa requests de rede, verifica console com stack traces mapeados.'},
+
+  // ── DEVOPS ──
+  {name:'github',cat:'devops',installs:253259,icon:'🐙',desc:'Servidor MCP oficial do GitHub. Cria issues, gerencia pull requests, revisa código e interage com a API completa do GitHub.'},
+  {name:'gitlab',cat:'devops',installs:32393,icon:'🦊',desc:'Integração GitLab DevOps. Gerencia repositórios, merge requests, pipelines CI/CD, issues e wikis.'},
+  {name:'coderabbit',cat:'devops',installs:25306,icon:'🐇',desc:'Revisão de código com IA especializada e 40+ analisadores estáticos — detecta bugs e vulnerabilidades. Gratuito.'},
+  {name:'qodo-skills',cat:'devops',installs:9995,icon:'✅',desc:'Verificações de qualidade de código, testes automatizados, scanning de segurança e validação de compliance em todo o SDLC.'},
+  {name:'pagerduty',cat:'devops',installs:3729,icon:'🚨',desc:'Scoring de risco baseado em dados históricos de incidentes PagerDuty. Pontua diffs pre-commit antes de fazer deploy.'},
+  {name:'sonarqube',cat:'devops',installs:2663,icon:'📡',desc:'7.000+ regras, scanning de secrets e quality gates em 40+ linguagens. Hooks PostToolUse após cada edição de arquivo.'},
+  {name:'buildkite',cat:'devops',installs:22,icon:'🏗️',desc:'Skills oficiais do Buildkite — pipelines, migração, preflight, agent runtime, CLI e API.'},
+  {name:'teamcity-cli',cat:'devops',installs:24,icon:'🏎️',desc:'Interação com TeamCity CI/CD via CLI. Explora builds, visualiza logs, inicia jobs e gerencia filas e agentes.'},
+  {name:'rootly',cat:'devops',installs:28,icon:'🌱',desc:'Gestão de incidentes ciclo completo: deploy safety, resposta a incidentes, gestão on-call e retrospectivas.'},
+
+  // ── CLOUD ──
+  {name:'vercel',cat:'cloud',installs:130848,icon:'▲',desc:'Integração Vercel. Gerencia deploys, verifica status de build, acessa logs, configura domínios e controla infraestrutura frontend.'},
+  {name:'firebase',cat:'cloud',installs:21407,icon:'🔥',desc:'Integração MCP Google Firebase. Gerencia bancos Firestore, autenticação, cloud functions, hosting e storage.'},
+  {name:'cloudflare',cat:'cloud',installs:7550,icon:'🌤️',desc:'Workers, Durable Objects, Agents SDK, servidores MCP, Wrangler CLI e performance web na plataforma Cloudflare.'},
+  {name:'aws-serverless',cat:'cloud',installs:6115,icon:'⚡',desc:'Design, build, deploy, teste e debug de aplicações serverless com serviços AWS Serverless.'},
+  {name:'deploy-on-aws',cat:'cloud',installs:7210,icon:'🚀',desc:'Deploy de aplicações na AWS com recomendações de arquitetura, estimativas de custo e deploy IaC.'},
+  {name:'terraform',cat:'cloud',installs:6006,icon:'🌿',desc:'Integração com o ecossistema Terraform para automação avançada em desenvolvimento de Infrastructure as Code.'},
+  {name:'netlify-skills',cat:'cloud',installs:2876,icon:'🌐',desc:'Skills Netlify — functions, edge functions, blobs, database, image CDN, forms, config, CLI, frameworks e AI gateway.'},
+  {name:'azure',cat:'cloud',installs:2401,icon:'🔷',desc:'Expert Azure: lista recursos, valida deploys, diagnostica infraestrutura em 50+ serviços Azure via MCP.'},
+  {name:'amazon-location-service',cat:'cloud',installs:2388,icon:'📍',desc:'Adiciona mapas, busca de locais, geocoding, roteamento e recursos geoespaciais com Amazon Location Service.'},
+  {name:'fastly-agent-toolkit',cat:'cloud',installs:2097,icon:'⚡',desc:'Ferramentas de desenvolvimento e skills de plataforma Fastly.'},
+  {name:'railway',cat:'cloud',installs:4142,icon:'🚂',desc:'Deploy e gestão de apps, bancos de dados e infraestrutura no Railway. Setup, deploys, configuração de ambiente e monitoramento.'},
+  {name:'aws-dev-toolkit',cat:'cloud',installs:1034,icon:'🔨',desc:'34 skills, 11 agentes e 3 servidores MCP para build, migração e revisão de arquitetura na AWS.'},
+  {name:'aws-amplify',cat:'cloud',installs:858,icon:'📡',desc:'Build de apps full-stack com AWS Amplify Gen 2: auth, modelos de dados, storage, APIs GraphQL e Lambda.'},
+  {name:'aws-core',cat:'cloud',installs:790,icon:'☁️',desc:'Build, deploy e operação de aplicações na AWS. Skills para Infrastructure as Code e serviços core.'},
+  {name:'mapbox',cat:'cloud',installs:32,icon:'🗺️',desc:'Skills e servidores MCP Mapbox para apps com consciência de localização: geoespacial, gerenciamento de estilos e padrões para web, iOS e Android.'},
+
+  // ── DATABASE ──
+  {name:'supabase',cat:'database',installs:97378,icon:'⚡',desc:'MCP Supabase: operações de banco, autenticação, storage e subscrições em tempo real. Gerencie projetos, execute SQL e interaja com o backend.'},
+  {name:'pinecone',cat:'database',installs:8798,icon:'🌲',desc:'Banco de dados vetorial Pinecone: gerencia índices, consulta dados e prototipa aplicações de busca semântica e RAG.'},
+  {name:'prisma',cat:'database',installs:4925,icon:'🔺',desc:'MCP Prisma: gestão de banco Postgres, migrations de schema, queries SQL e connection strings.'},
+  {name:'mongodb',cat:'database',installs:4826,icon:'🍃',desc:'Plugin oficial MongoDB: conecta a bancos, explora dados, gerencia collections, otimiza queries e implementa boas práticas.'},
+  {name:'neon',cat:'database',installs:2047,icon:'🌙',desc:'Gerencia projetos e bancos Neon com a skill de agente neon-postgres e o Neon MCP Server.'},
+  {name:'planetscale',cat:'database',installs:1895,icon:'🪐',desc:'Acessa organizações, bancos, branches e esquemas PlanetScale. Consulta dados, identifica queries lentas.'},
+  {name:'cockroachdb',cat:'database',installs:1454,icon:'🪳',desc:'Conecta a clusters CockroachDB — explore schemas, escreva SQL otimizado. 3 agentes (DBA, Developer, Operator) e 32 skills.'},
+  {name:'databases-on-aws',cat:'database',installs:1102,icon:'🗄️',desc:'Orientação expert sobre o portfólio AWS de bancos: design, queries, migrações e escolha do banco certo.'},
+  {name:'cloud-sql-postgresql',cat:'database',installs:935,icon:'🐘',desc:'Cria, conecta e interage com um banco Cloud SQL for PostgreSQL e seus dados.'},
+  {name:'azure-cosmos-db-assistant',cat:'database',installs:879,icon:'🔵',desc:'Expert Azure Cosmos DB: modelagem de dados, otimização de queries, ajuste de performance e boas práticas.'},
+  {name:'alloydb',cat:'database',installs:389,icon:'🔷',desc:'Cria, conecta e interage com um banco AlloyDB for PostgreSQL e seus dados.'},
+  {name:'qdrant-skills',cat:'database',installs:384,icon:'🎯',desc:'Skills para Qdrant vector search: scaling, performance, qualidade de busca, monitoramento e SDKs em 6 linguagens.'},
+  {name:'zilliz',cat:'database',installs:325,icon:'⚡',desc:'Gestão Zilliz Cloud: ciclo de vida de cluster, schema, busca vetorial, ajuste de índice, RBAC e backups.'},
+  {name:'clickhouse',cat:'database',installs:270,icon:'🖱️',desc:'Conecta ao ClickHouse Cloud: navegue organizações, serviços, bancos e esquemas. Execute queries SQL analíticas.'},
+  {name:'redis-development',cat:'database',installs:70,icon:'🔴',desc:'Boas práticas Redis: estruturas de dados, query engine, busca vetorial, caching e otimização de performance.'},
+  {name:'duckdb-skills',cat:'database',installs:42,icon:'🦆',desc:'Skills DuckDB: leia qualquer arquivo de dados, faça queries, pesquise docs DuckDB/DuckLake e instale extensões.'},
+  {name:'clickhouse-best-practices',cat:'database',installs:27,icon:'📐',desc:'28 regras de boas práticas para design de schema ClickHouse, otimização de queries e ingestão de dados.'},
+  {name:'box',cat:'database',installs:796,icon:'📦',desc:'Trabalhe com seu conteúdo Box — busca arquivos, organiza pastas, colabora e usa Box AI para resumir documentos.'},
+  {name:'airtable',cat:'database',installs:233,icon:'📊',desc:'Airtable como camada de dados para agentes — cria bases e schemas, trabalha com registros. Inclui MCP oficial.'},
+
+  // ── SECURITY ──
+  {name:'security-guidance',cat:'security',installs:162177,icon:'🛡️',desc:'Hook de lembrete de segurança: avisa sobre injeção de comandos, XSS e padrões inseguros ao editar arquivos.'},
+  {name:'semgrep',cat:'security',installs:14968,icon:'🔴',desc:'Semgrep detecta vulnerabilidades de segurança em tempo real e orienta Claude a escrever código seguro desde o início.'},
+  {name:'sonatype-guide',cat:'security',installs:6471,icon:'🔐',desc:'Inteligência de supply chain de software: analisa dependências por vulnerabilidades e recomenda versões seguras.'},
+  {name:'aikido',cat:'security',installs:3924,icon:'🥋',desc:'Scanning de segurança Aikido para Claude Code — SAST, secrets e detecção de vulnerabilidades IaC via MCP.'},
+  {name:'ai-plugins',cat:'security',installs:2848,icon:'🛡️',desc:'Endor Labs: escaneia, prioriza e corrige riscos de segurança em toda a supply chain de software.'},
+  {name:'vanta-mcp-plugin',cat:'security',installs:548,icon:'✅',desc:'Conecta Claude Code à plataforma de compliance Vanta. Combina inteligência de remediação com contexto do repositório.'},
+  {name:'42crunch-api-security-testing',cat:'security',installs:555,icon:'🔒',desc:'Audita specs OpenAPI, detecta vulnerabilidades OWASP API Security (BOLA/BFLA) e aplica correções com IA.'},
+  {name:'nightvision',cat:'security',installs:1383,icon:'🦉',desc:'DAST e API Discovery: encontra vulnerabilidades exploráveis em aplicações web e APIs REST.'},
+  {name:'crowdstrike-falcon-foundry',cat:'security',installs:361,icon:'🦅',desc:'Skills CrowdStrike Falcon Foundry: UI, collections, functions, workflows, integração de API e debugging.'},
+  {name:'jfrog',cat:'security',installs:100,icon:'🐸',desc:'Plataforma JFrog: repos e artefatos Artifactory, descobertas de segurança, workflows no SDLC e administração.'},
+  {name:'zscaler',cat:'security',installs:822,icon:'🔒',desc:'Plataforma de segurança cloud Zscaler: ZPA, ZIA, ZDX, ZCC, EASM e Z-Insights. Cria políticas e investiga incidentes.'},
+
+  // ── DESIGN ──
+  {name:'figma',cat:'design',installs:131854,icon:'🎭',desc:'Integração Figma: acessa arquivos de design, extrai componentes, lê design tokens e traduz designs em código.'},
+  {name:'cloudinary',cat:'design',installs:1627,icon:'☁️',desc:'Gerencie assets, aplique transformações, otimize mídia e mais no Cloudinary via conversa natural.'},
+  {name:'miro',cat:'design',installs:1392,icon:'📌',desc:'Acesso seguro a boards Miro. Lê contexto do board, cria diagramas e gera código com segurança enterprise.'},
+  {name:'adobe-for-creativity',cat:'design',installs:943,icon:'🅰️',desc:'Ferramentas criativas Adobe: remoção de fundo, vetorização e retoque profissional de imagens.'},
+  {name:'spotify-ads-api',cat:'design',installs:753,icon:'🎧',desc:'Gerencie campanhas de anúncios Spotify em linguagem natural: crie campanhas, ad sets, anúncios e relatórios.'},
+  {name:'save-to-spotify',cat:'design',installs:64,icon:'🎵',desc:'Cria episódios de áudio polidos com narração TTS, timelines ricas, imagens de capa e salva no Spotify.'},
+  {name:'hyperframes',cat:'design',installs:52,icon:'🎞️',desc:'HyperFrames do HeyGen: escreva HTML, renderize vídeo com animações GSAP, legendas e voiceovers.'},
+  {name:'runway-api',cat:'design',installs:26,icon:'🎬',desc:'Geração de vídeo em escala com a API Runway — vídeos de produto, campanhas publicitárias e iteração criativa.'},
+
+  // ── ANALYTICS ──
+  {name:'sentry',cat:'analytics',installs:31401,icon:'🔴',desc:'Monitoramento de erros Sentry. Acessa relatórios, analisa stack traces, busca issues e debugga erros de produção.'},
+  {name:'posthog',cat:'analytics',installs:10371,icon:'🦔',desc:'Analytics PostHog, feature flags, experimentos, rastreamento de erros e insights direto do Claude Code.'},
+  {name:'datadog',cat:'analytics',installs:2104,icon:'🐶',desc:'Use Datadog via MCP pré-configurado. Consulte logs, métricas, traces, dashboards via conversa natural.'},
+  {name:'logfire',cat:'analytics',installs:469,icon:'🔥',desc:'Observabilidade Logfire para Python com auto-instrumentação para FastAPI, httpx, asyncpg e SQLAlchemy.'},
+  {name:'amplitude',cat:'analytics',installs:1220,icon:'📈',desc:'Amplitude como analista expert — instrumente, analise gráficos, crie dashboards e gerencie experimentos.'},
+  {name:'dash0',cat:'analytics',installs:225,icon:'📡',desc:'Observabilidade OpenTelemetry para sessões Claude Code. Captura tool calls, tokens e erros como traces OTel.'},
+  {name:'fullstory',cat:'analytics',installs:113,icon:'🎥',desc:'Consulta analytics comportamental Fullstory, session replays e insights de experiência do cliente.'},
+  {name:'codspeed',cat:'analytics',installs:32,icon:'⏱️',desc:'Testes de performance: benchmarking, flamegraphs e comparações de performance via MCP CodSpeed.'},
+  {name:'bigdata-com',cat:'analytics',installs:903,icon:'💹',desc:'Pesquisa financeira, analytics e ferramentas de inteligência via MCP Bigdata.com.'},
+  {name:'pigment',cat:'analytics',installs:192,icon:'🎨',desc:'Analise dados de negócios e construa modelos, métricas e boards Pigment customizados via linguagem natural.'},
+  {name:'windsor-ai',cat:'analytics',installs:743,icon:'📊',desc:'Conecta a 325+ fontes de dados de negócios via Windsor.ai: marketing, vendas, CRM, ecommerce e finanças.'},
+  {name:'sentry-cli',cat:'analytics',installs:57,icon:'🔴',desc:'Skills para usar o Sentry CLI para interagir com o Sentry pela linha de comando.'},
+
+  // ── COMMUNICATION ──
+  {name:'telegram',cat:'comms',installs:80186,icon:'✈️',desc:'Bridge de mensagens Telegram com controle de acesso integrado. Gerencie pairing, allowlists e política via /telegram:access.'},
+  {name:'slack',cat:'comms',installs:67687,icon:'✴️',desc:'Integração Slack. Busque mensagens, acesse canais, leia threads e fique conectado com a equipe enquanto programa.'},
+  {name:'discord',cat:'comms',installs:25083,icon:'🎮',desc:'Bridge Discord com controle de acesso integrado. Gerencie pairing, allowlists e política via /discord:access.'},
+  {name:'imessage',cat:'comms',installs:11796,icon:'💬',desc:'Bridge iMessage com controle de acesso. Lê chat.db diretamente, envia via AppleScript.'},
+  {name:'circleback',cat:'comms',installs:10611,icon:'🔄',desc:'Integração Circleback: busque e acesse reuniões, emails, eventos de calendário e mais.'},
+  {name:'fakechat',cat:'comms',installs:6003,icon:'🤖',desc:'Chat web localhost para testar fluxo de notificação de canal sem tokens ou serviço de terceiros.'},
+  {name:'postiz',cat:'comms',installs:2200,icon:'📱',desc:'Automação de redes sociais em 28+ plataformas: X, LinkedIn, Reddit, YouTube, TikTok, Instagram e mais.'},
+  {name:'zoom-plugin',cat:'comms',installs:2146,icon:'📹',desc:'Planeja, constrói e debuga integrações Zoom em REST APIs, SDKs, webhooks, bots e workflows MCP.'},
+  {name:'intercom',cat:'comms',installs:2052,icon:'💬',desc:'Busca conversas, analisa padrões de suporte, consulta contatos e instala o Messenger Intercom.'},
+  {name:'twilio-developer-kit',cat:'comms',installs:453,icon:'📞',desc:'Skills Twilio para agentes — SMS, Voice, WhatsApp, Verify, SendGrid e 30+ produtos.'},
+
+  // ── PROJECT MANAGEMENT ──
+  {name:'atlassian',cat:'pm',installs:71597,icon:'🔵',desc:'Conecta ao Jira e Confluence. Busca e cria issues, acessa documentação, gerencia sprints e integra workflows.'},
+  {name:'linear',cat:'pm',installs:38635,icon:'◆',desc:'Rastreamento de issues Linear. Cria issues, gerencia projetos, atualiza status e busca em workspaces.'},
+  {name:'asana',cat:'pm',installs:9017,icon:'🔴',desc:'Gestão de projetos Asana: cria e gerencia tarefas, busca projetos, atualiza atribuições e rastreia progresso.'},
+  {name:'mintlify',cat:'pm',installs:5088,icon:'📖',desc:'Constrói sites de documentação com Mintlify. Converte arquivos para MDX e automatiza atualizações de docs.'},
+  {name:'notion',cat:'pm',installs:0,icon:'⬜',desc:'Integração Notion. Busca páginas, cria e atualiza documentos, gerencia bancos de dados e acessa a base de conhecimento.'},
+  {name:'forge-skills',cat:'pm',installs:33,icon:'⚡',desc:'Skills para Atlassian Forge: scaffold, deploy de apps, conectores Teamwork Graph para Rovo Search/Chat.'},
+
+  // ── PAYMENTS ──
+  {name:'stripe',cat:'payments',installs:28988,icon:'💳',desc:'Plugin de desenvolvimento Stripe para Claude — integração completa com a plataforma de pagamentos.'},
+  {name:'revenuecat',cat:'payments',installs:2069,icon:'💰',desc:'Configure projetos RevenueCat, apps, produtos, entitlements e offerings direto do Claude Code.'},
+  {name:'rc',cat:'payments',installs:2240,icon:'💰',desc:'Gerencia o backend de compras in-app RevenueCat sem sair do workflow de desenvolvimento.'},
+  {name:'sumup',cat:'payments',installs:1732,icon:'💳',desc:'Integrações SumUp para terminal e checkout online. Build apps Android e iOS POS com leitores de cartão.'},
+  {name:'mercadopago',cat:'payments',installs:179,icon:'🛒',desc:'Toolkit Mercado Pago: 4 skills de orquestração que acessam todos os endpoints via MCP server oficial.'},
+  {name:'circle-skills',cat:'payments',installs:22,icon:'⭕',desc:'Boas práticas para pagamentos USDC, transferências cross-chain, wallets e smart contracts.'},
+  {name:'carta-cap-table',cat:'payments',installs:62,icon:'📊',desc:'Skills Carta Cap Table: consulta cap tables, grants, SAFEs, avaliações 409A e cenários de waterfall.'},
+  {name:'carta-crm',cat:'payments',installs:22,icon:'🤝',desc:'CRM Carta conversacional: busca, adiciona e atualiza investidores, contatos, deals e fundraisings.'},
+  {name:'carta-investors',cat:'payments',installs:23,icon:'📈',desc:'Skills Carta Investors: dados de investidores, benchmarks de performance e relatórios regulatórios.'},
+
+  // ── AI & ML ──
+  {name:'huggingface-skills',cat:'ai',installs:27835,icon:'🤗',desc:'Build, treina, avalia e usa modelos de IA open source, datasets e spaces no Hugging Face.'},
+  {name:'atomic-agents',cat:'ai',installs:11383,icon:'⚛️',desc:'Workflow para construir agentes de IA com Atomic Agents: design de schema, arquitetura e revisão de código.'},
+  {name:'pydantic-ai',cat:'ai',installs:2349,icon:'🐍',desc:'Padrões atualizados para Pydantic AI: agentes, ferramentas, saída estruturada, streaming e apps multi-agente.'},
+  {name:'fiftyone',cat:'ai',installs:1816,icon:'👁️',desc:'Datasets de alta qualidade e modelos de visão computacional: visualize, analise, encontre duplicatas e avalie.'},
+  {name:'datarobot-agent-skills',cat:'ai',installs:526,icon:'🤖',desc:'Skills DataRobot: treinamento de modelos, deployment, previsões, feature engineering e monitoramento.'},
+  {name:'aws-agents',cat:'ai',installs:480,icon:'🤖',desc:'Build de agentes de IA na AWS com Amazon Bedrock AgentCore: ferramentas, memória, políticas e debugging.'},
+  {name:'outputai',cat:'ai',installs:229,icon:'🔧',desc:'Toolkit Output.ai: 5 agentes especialistas e 40+ slash-commands para scaffolding, debugging e avaliação.'},
+  {name:'youdotcom-agent-skills',cat:'ai',installs:736,icon:'🔍',desc:'Skills You.com para busca web, pesquisa com citações. Integrações para Vercel AI SDK, Claude Agent SDK e crewAI.'},
+  {name:'togetherai-skills',cat:'ai',installs:22,icon:'🤝',desc:'Skills Together AI: inferência, treinamento, embeddings, áudio, vídeo, imagens e function calling.'},
+  {name:'dominodatalab',cat:'ai',installs:22,icon:'🎲',desc:'Suporte completo Domino Data Lab: workspaces, jobs, deploy de modelos, Spark/Ray/Dask e GenAI tracing.'},
+
+  // ── WEB DATA ──
+  {name:'context7',cat:'webdata',installs:337289,icon:'📚',desc:'MCP Context7: lookup de documentação atualizada por versão diretamente de repositórios fonte.'},
+  {name:'serena',cat:'webdata',installs:79844,icon:'🔭',desc:'Análise semântica de código via LSP: compreensão inteligente, sugestões de refatoração e navegação em codebase.'},
+  {name:'greptile',cat:'webdata',installs:48997,icon:'🦗',desc:'Busca de codebase com IA em linguagem natural: encontra código relevante e entende dependências.'},
+  {name:'firecrawl',cat:'webdata',installs:29027,icon:'🔥',desc:'Web scraping via Firecrawl: transforma sites em markdown. Scrape páginas, crawle sites e extraia dados estruturados.'},
+  {name:'sourcegraph',cat:'webdata',installs:9197,icon:'🔎',desc:'Busca e compreensão de código em repositórios: rastreia referências, analisa impacto e investiga incidentes.'},
+  {name:'postman',cat:'webdata',installs:13771,icon:'📮',desc:'Ciclo de vida completo de API: sincronize collections, gere código, execute testes, crie mocks e publique docs.'},
+  {name:'exa',cat:'webdata',installs:1616,icon:'🔍',desc:'Busca web Exa AI com pesquisa aprofundada e extração de conteúdo: pessoas, empresas e artigos acadêmicos.'},
+  {name:'nimble',cat:'webdata',installs:1945,icon:'🌐',desc:'Toolkit de dados web Nimble: busca, extração, mapeamento, crawling e agentes de dados estruturados.'},
+  {name:'brightdata-plugin',cat:'webdata',installs:1210,icon:'💡',desc:'Web scraping via Bright Data com bypass de bot detection/CAPTCHA e extração de 40+ sites como Amazon e LinkedIn.'},
+  {name:'zoominfo',cat:'webdata',installs:1591,icon:'🏢',desc:'Busca empresas e contatos, enriquece leads e obtém recomendações com IA para workflows completos de vendas B2B.'},
+  {name:'apollo',cat:'webdata',installs:608,icon:'🎯',desc:'Prospect, enriqueça leads, carregue sequências de outreach e consulte analytics de vendas com Apollo.io.'},
+  {name:'apollo-skills',cat:'webdata',installs:32,icon:'🚀',desc:'Skills Apollo GraphQL: Client, Server, Federation, Connectors, Router e boas práticas de schema e queries.'},
+  {name:'lumen',cat:'webdata',installs:22,icon:'💡',desc:'Busca semântica de código local via MCP com Go AST e embeddings Ollama/LM Studio — sem cloud, sem npm.'},
+
+  // ── ENTERPRISE ──
+  {name:'atlassian',cat:'enterprise',installs:71597,icon:'🔵',desc:'Jira e Confluence. Cria e busca issues, acessa documentação, gerencia sprints e integra workflows de desenvolvimento.'},
+  {name:'ui5',cat:'enterprise',installs:945,icon:'🔵',desc:'SAPUI5/OpenUI5: cria e valida projetos UI5, acessa documentação de API e obtém diretrizes de desenvolvimento.'},
+  {name:'ui5-typescript-conversion',cat:'enterprise',installs:1133,icon:'🔵',desc:'SAPUI5/OpenUI5: converte projetos baseados em JavaScript para TypeScript.'},
+  {name:'dataverse',cat:'enterprise',installs:1248,icon:'🔷',desc:'Skills para Microsoft Dataverse — com Dataverse MCP, PAC CLI e Python SDK.'},
+  {name:'netsuite-suitecloud',cat:'enterprise',installs:563,icon:'🟠',desc:'Skills NetSuite Oracle: SuiteCloud Development Framework (SDF) e componentes UIF single-page-app.'},
+  {name:'oracle-ai-data-platform-workbench-spark-connectors',cat:'enterprise',installs:330,icon:'🔶',desc:'Oracle AI Data Platform: 18 skills de conectores para Oracle DB, ExaCS, Fusion ERP, OCI Streaming e mais.'},
+  {name:'sap-fiori-mcp-server',cat:'enterprise',installs:190,icon:'🎯',desc:'Servidor MCP para ferramentas de desenvolvimento SAP Fiori com assistência de IA.'},
+  {name:'sap-mdk-server',cat:'enterprise',installs:289,icon:'📱',desc:'SAP Mobile Development Kit (MDK): lookups de schema, validação de ações, edição de regras e scaffolding.'},
+  {name:'sap-cds-mcp',cat:'enterprise',installs:157,icon:'🔵',desc:'Desenvolvimento de projetos SAP Cloud Application Programming Model (CAP) com busca de docs e modelos CDS.'},
+  {name:'cds-mcp',cat:'enterprise',installs:758,icon:'🔵',desc:'Desenvolvimento de projetos SAP CAP com assistência de IA. Busca modelos CDS e documentação CAP.'},
+  {name:'agentforce-adlc',cat:'enterprise',installs:373,icon:'☁️',desc:'Salesforce Agentforce ADLC: autora, descobre, faz scaffold, deploya, testa e otimiza arquivos .agent.'},
+  {name:'servicenow-sdk',cat:'enterprise',installs:173,icon:'🏢',desc:'Cria, edita e faz deploy de aplicações ServiceNow com o Fluent SDK via Claude AI.'},
+
+  // ── ECOMMERCE ──
+  {name:'shopify-ai-toolkit',cat:'ecommerce',installs:2420,icon:'🛍️',desc:'18 skills para a plataforma Shopify: docs, API GraphQL, Liquid, storefronts Hydrogen, UI Polaris e CLI.'},
+  {name:'wix',cat:'ecommerce',installs:2415,icon:'🌐',desc:'Build, gerencia e faz deploy de sites e apps Wix com CLI para extensões de dashboard e APIs backend.'},
+  {name:'wordpress.com',cat:'ecommerce',installs:4558,icon:'🔵',desc:'Cria e edita sites WordPress com WordPress Studio antes de fazer deploy no WordPress.com.'},
+  {name:'shopify',cat:'ecommerce',installs:1796,icon:'🛍️',desc:'Ferramentas desenvolvedor Shopify: busca docs, gera e valida código GraphQL, Liquid e UI extension.'},
+  {name:'liquid-skills',cat:'ecommerce',installs:1610,icon:'💧',desc:'Fundamentos Liquid, padrões CSS/JS/HTML e acessibilidade WCAG para temas Shopify.'},
+  {name:'sanity',cat:'ecommerce',installs:1072,icon:'🟠',desc:'Plataforma de conteúdo Sanity com MCP server. Consulta e cria conteúdo, constrói queries GROQ e Visual Editing.'},
+
+  // ── AUTH ──
+  {name:'auth0',cat:'auth',installs:1463,icon:'🔐',desc:'Adiciona autenticação a qualquer app com Auth0: detecta seu framework, faz scaffold da integração e guia pelo login/logout.'},
+  {name:'workos',cat:'auth',installs:76,icon:'🏢',desc:'Skills WorkOS para AuthKit, SSO, Directory Sync, RBAC, Vault, Audit Logs e migrações.'},
+  {name:'duende-skills',cat:'auth',installs:24,icon:'🔑',desc:'Skills Duende para Claude Code: OAuth/OIDC, IdentityServer, gestão de tokens e autenticação ASP.NET Core.'},
+
+  // ── MOBILE ──
+  {name:'laravel-boost',cat:'mobile',installs:18752,icon:'🔴',desc:'Toolkit Laravel: comandos Artisan, queries Eloquent, routing, migrations e geração de código MCP.'},
+  {name:'expo',cat:'mobile',installs:6542,icon:'📱',desc:'Skills Expo para build, deploy, upgrade e debug de apps React Native com Expo Router, iOS, Android e CI/CD.'},
+  {name:'quarkus-agent',cat:'mobile',installs:474,icon:'⚡',desc:'MCP para Quarkus: scaffolding de projetos, lifecycle do modo dev, skills de extensão e busca de documentação.'},
+  {name:'qt-development-skills',cat:'mobile',installs:974,icon:'🖥️',desc:'Skills Qt para C++/QML: revisão de código, codificação QML e documentação de projetos Qt.'},
+  {name:'base44',cat:'mobile',installs:941,icon:'🔢',desc:'Build e deploy de apps full-stack Base44 com CLI e skills de desenvolvimento JavaScript/TypeScript SDK.'},
+  {name:'convex-backend',cat:'mobile',installs:51,icon:'⚡',desc:'Backend Convex reativo e type-safe: schemas, server functions, auth, file storage e features multiplayer.'},
+  {name:'appwrite',cat:'mobile',installs:31,icon:'🔒',desc:'Ferramentas Appwrite para Claude Code: skills de SDK, servidores MCP e comandos de deploy.'},
+
+  // ── DATA ENGINEERING ──
+  {name:'data-engineering',cat:'dataeng',installs:9937,icon:'⛏️',desc:'Engenharia de dados: exploração de warehouse, criação de pipelines e integração Airflow.'},
+  {name:'data',cat:'dataeng',installs:5544,icon:'📊',desc:'Apache Airflow e Astronomer: cria DAGs, debugga falhas, rastreia lineagem e gerencia deploys locais e cloud.'},
+  {name:'atlan',cat:'dataeng',installs:1357,icon:'📚',desc:'Catálogo de dados Atlan: busca, governa e gerencia ativos de dados. Busca semântica e rastreamento de lineagem.'},
+  {name:'astronomer-data-agents',cat:'dataeng',installs:1561,icon:'🌌',desc:'Engenharia de dados para Airflow e Astronomer: cria DAGs, migra Airflow 2→3 e gerencia deploys.'},
+  {name:'data-agent-kit-starter-pack',cat:'dataeng',installs:818,icon:'🔧',desc:'Suite para engenheiros de dados no Google Cloud: pipelines complexos, dbt, notebooks Spark e BigQuery SQL.'},
+  {name:'snowflake-cortex-code',cat:'dataeng',installs:669,icon:'❄️',desc:'Roteia prompts Snowflake para Cortex Code. Slash commands para revisão de código e delegação de tarefas.'},
+  {name:'aws-data-analytics',cat:'dataeng',installs:369,icon:'📉',desc:'Data lake, analytics e workflows ETL com S3 Tables, AWS Glue e Athena.'},
+  {name:'datahub-skills',cat:'dataeng',installs:27,icon:'🔗',desc:'Toolkit DataHub: planejamento de conector, busca no catálogo, metadados, lineagem e qualidade de dados.'},
+
+  // ── UTILITIES ──
+  {name:'microsoft-docs',cat:'utils',installs:16973,icon:'🔷',desc:'Documentação oficial Microsoft, referências de API e exemplos de código para Azure, .NET, Windows e mais.'},
+  {name:'desktop-commander',cat:'utils',installs:1687,icon:'🖥️',desc:'MCP para comandos de terminal, gestão de processos e operações de arquivo em PDF, DOCX, Excel e imagens.'},
+  {name:'legalzoom',cat:'utils',installs:2247,icon:'⚖️',desc:'Orientação jurídica e revisão de documentos com IA: identifica riscos críticos e cláusulas importantes.'},
+  {name:'zapier',cat:'utils',installs:2064,icon:'⚡',desc:'Conecte 8.000+ apps ao workflow de IA. Descubra, habilite e execute ações Zapier diretamente.'},
+  {name:'resend',cat:'utils',installs:51,icon:'📧',desc:'Skills Resend para envio de emails, inbox de agente, CLI, componentes React Email e boas práticas de entregabilidade.'},
+  {name:'hunter',cat:'utils',installs:33,icon:'🎯',desc:'Encontre e verifique endereços de email profissionais, busque contatos por domínio e enriqueça dados de empresas.'},
+  {name:'cwc-makers',cat:'utils',installs:231,icon:'🔧',desc:'Onboarda um Code-with-Claude Makers Cardputer com /maker-setup: clona o repo e instala o Claude Buddy.'},
+];
+
+// ── I18N ──
+const TR = {
+  pt:{
+    search_ph:'buscar plugins...',
+    nav_browse:'Navegar', nav_all:'Todos os plugins', nav_cats:'Categorias',
+    sort_pop:'↓ popularidade', sort_alpha:'A → Z',
+    update_lbl:'Verificar novos',
+    hero_eyebrow:'◆ claude-plugins-official · marketplace',
+    hero_sub:'plugins oficiais para o Claude Code. Clique em <strong>+ adicionar</strong> nos plugins desejados, monte sua fila e copie todos os comandos de uma vez.',
+    stat_plugins:'Plugins', stat_cats:'Categorias', stat_installed:'Instalados',
+    credit:'Curado por',
+    no_results:'Nenhum plugin encontrado.',
+    installs_lbl:'instalações',
+    installed_badge:'✓ instalado',
+    new_pill:'NOVO',
+    add_btn:'+ adicionar', added_btn:'✓ adicionado',
+    cart_empty:'nenhum plugin selecionado',
+    cart_clear:'limpar', cart_copy:'📋 copiar tudo',
+    cart_copied:n=>`✓ ${n} copiado${n!==1?'s':''}!`,
+    toast_copied:n=>`✓ ${n} comando${n!==1?'s':''} copiado${n!==1?'s':''} — cole no terminal!`,
+    cat_pill:n=>`${n} plugins`,
+    update_ok:n=>`✓ Tudo em dia — ${n} plugins, nenhum novo`,
+    update_new:(n,name)=>`✨ ${n} novo${n>1?'s':''} plugin${n>1?'s':''}! Rolando até ${name}…`,
+    update_err:msg=>`⚠ Erro ao buscar: ${msg}`,
+    last_checked:ts=>`Última verificação no GitHub: ${ts}`,
+    modal_title:'Selecione tudo e copie',
+    modal_hint:'O clipboard automático não está disponível em <code style="background:#f0f4ff;padding:2px 6px;border-radius:4px">file://</code>. Selecione o texto abaixo (Ctrl+A) e copie (Ctrl+C).',
+    modal_close:'Fechar', modal_copy:'Copiar',
+    cat_descs:{
+      core:'Superpoderes, skills e workflows nativos do Claude Code',
+      lsp:'Inteligência de código via LSP para diversas linguagens',
+      testing:'Automação de browser e testes end-to-end',
+      devops:'Git, CI/CD, pipelines e gestão de incidentes',
+      cloud:'Provedores cloud, serverless e plataformas de deploy',
+      database:'Bancos relacionais, NoSQL, vetoriais e armazenamento',
+      security:'SAST, DAST, secrets scanning e detecção de vulnerabilidades',
+      design:'Ferramentas de design, geração de imagem/vídeo e IA criativa',
+      analytics:'Monitoramento, rastreamento de erros e análise de dados',
+      comms:'Bridges de mensageria e plataformas de comunicação',
+      pm:'Rastreamento de tarefas, gestão de issues e documentação',
+      payments:'Processamento de pagamentos, dados financeiros e fintech',
+      ai:'Plataformas de IA, treinamento de modelos e agentes',
+      webdata:'Ciclo de vida de APIs, web scraping e busca em código',
+      enterprise:'SAP, Oracle, ServiceNow, Salesforce e ferramentas corporativas',
+      ecommerce:'Shopify, WordPress, Wix e gestão de conteúdo',
+      auth:'Autenticação, SSO, OAuth e gestão de identidade',
+      mobile:'React Native, iOS, Android e frameworks de backend',
+      dataeng:'Pipelines de dados, ETL e infraestrutura analítica',
+      utils:'Ferramentas de produtividade, memória e utilitários especiais',
+    }
+  },
+  en:{
+    search_ph:'search plugins...',
+    nav_browse:'Browse', nav_all:'All plugins', nav_cats:'Categories',
+    sort_pop:'↓ popularity', sort_alpha:'A → Z',
+    update_lbl:'Check for new',
+    hero_eyebrow:'◆ claude-plugins-official · marketplace',
+    hero_sub:'official Claude Code plugins. Click <strong>+ add</strong> on the plugins you want, build your queue and copy all commands at once.',
+    stat_plugins:'Plugins', stat_cats:'Categories', stat_installed:'Installed',
+    credit:'Curated by',
+    no_results:'No plugins found.',
+    installs_lbl:'installs',
+    installed_badge:'✓ installed',
+    new_pill:'NEW',
+    add_btn:'+ add', added_btn:'✓ added',
+    cart_empty:'no plugin selected',
+    cart_clear:'clear', cart_copy:'📋 copy all',
+    cart_copied:n=>`✓ ${n} copied!`,
+    toast_copied:n=>`✓ ${n} command${n!==1?'s':''} copied — paste in your terminal!`,
+    cat_pill:n=>`${n} plugins`,
+    update_ok:n=>`✓ Up to date — ${n} plugins, nothing new`,
+    update_new:(n,name)=>`✨ ${n} new plugin${n>1?'s':''}! Scrolling to ${name}…`,
+    update_err:msg=>`⚠ Fetch error: ${msg}`,
+    last_checked:ts=>`Last checked on GitHub: ${ts}`,
+    modal_title:'Select all and copy',
+    modal_hint:'Auto clipboard is not available on <code style="background:#f0f4ff;padding:2px 6px;border-radius:4px">file://</code>. Select the text below (Ctrl+A) and copy (Ctrl+C).',
+    modal_close:'Close', modal_copy:'Copy',
+    cat_descs:{
+      core:'Native superpowers, skills and workflows for Claude Code',
+      lsp:'Code intelligence via LSP for multiple languages',
+      testing:'Browser automation and end-to-end testing',
+      devops:'Git, CI/CD, pipelines and incident management',
+      cloud:'Cloud providers, serverless and deployment platforms',
+      database:'Relational, NoSQL, vector databases and storage',
+      security:'SAST, DAST, secrets scanning and vulnerability detection',
+      design:'Design tools, image/video generation and creative AI',
+      analytics:'Monitoring, error tracking and data analysis',
+      comms:'Messaging bridges and communication platforms',
+      pm:'Issue tracking, task management and documentation',
+      payments:'Payment processing, financial data and fintech',
+      ai:'AI platforms, model training and agents',
+      webdata:'API lifecycle, web scraping and code search',
+      enterprise:'SAP, Oracle, ServiceNow, Salesforce and enterprise tools',
+      ecommerce:'Shopify, WordPress, Wix and content management',
+      auth:'Authentication, SSO, OAuth and identity management',
+      mobile:'React Native, iOS, Android and backend frameworks',
+      dataeng:'Data pipelines, ETL and analytics infrastructure',
+      utils:'Productivity tools, memory and special utilities',
+    }
+  }
+};
+
+let currentLang = localStorage.getItem('cc-lang')||'pt';
+function t(key,...a){ const v=TR[currentLang][key]; return typeof v==='function'?v(...a):v; }
+
+function setLang(lang){
+  currentLang=lang;
+  localStorage.setItem('cc-lang',lang);
+  document.documentElement.lang=lang==='pt'?'pt-BR':'en';
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
+  applyTranslations();
+  buildSidebar();
+  render();
+}
+
+function applyTranslations(){
+  const si=document.getElementById('search-input');
+  if(si)si.placeholder=t('search_ph');
+  const ul=document.getElementById('update-btn-label');
+  if(ul)ul.textContent=t('update_lbl');
+  const ss=document.getElementById('sort-select');
+  if(ss){ss.options[0].text=t('sort_pop');ss.options[1].text=t('sort_alpha');}
+  const hs=document.querySelector('.hero-sub');
+  if(hs)hs.innerHTML=`${PLUGINS.length} ${t('hero_sub')}`;
+  const he=document.querySelector('.hero-eyebrow');
+  if(he)he.textContent=t('hero_eyebrow');
+  const hc=document.querySelector('.hero-credit');
+  if(hc)hc.innerHTML=`${t('credit')} <strong>Daniel Tornieri</strong> · <a href="https://www.linkedin.com/in/daniel-tornieri-09639813/" target="_blank" rel="noopener">LinkedIn</a>`;
+  const lbls=document.querySelectorAll('.stat-lbl');
+  if(lbls[0])lbls[0].textContent=t('stat_plugins');
+  if(lbls[1])lbls[1].textContent=t('stat_cats');
+  if(lbls[2])lbls[2].textContent=t('stat_installed');
+  const ep=document.querySelector('#empty p');
+  if(ep)ep.textContent=t('no_results');
+  const cs=document.getElementById('cart-status');
+  if(cs&&cart&&cart.size===0)cs.textContent=t('cart_empty');
+  const ccl=document.getElementById('cart-clear-btn');
+  if(ccl)ccl.textContent=t('cart_clear');
+  const ccp=document.getElementById('cart-copy-btn');
+  if(ccp&&!ccp.classList.contains('copied'))ccp.textContent=t('cart_copy');
+}
+
+let currentCategory = 'all';
+let currentSearch = '';
+let currentSort = 'installs';
+
+function getCat(id){ return CATEGORIES.find(c=>c.id===id)||{color:'#94a3b8',name:id,icon:'?'} }
+
+function fmt(n){
+  if(!n)return '—';
+  if(n>=1e6)return(n/1e6).toFixed(1)+'M';
+  if(n>=1000)return(n/1000).toFixed(n>=10000?0:1)+'k';
+  return n+'';
+}
+
+function cardHtml(p){
+  const cat=getCat(p.cat);
+  const isInstalled=INSTALLED.includes(p.name);
+  const cmd=`claude plugin install ${p.name}@claude-plugins-official`;
+  return `
+  <div class="plugin-card${cart.has(p.name)?' in-cart':''}" data-plugin="${p.name}" style="--cat-color:${cat.color}">
+    ${isInstalled?`<span class="installed-badge">${t('installed_badge')}</span>`:''}
+    <div class="card-top">
+      <div class="card-icon" style="background:${cat.color}18;border:1.5px solid ${cat.color}28">${p.icon}</div>
+      <div class="card-meta">
+        <div class="card-name">${p.name}${p.isNew?`<span class="new-pill">${t('new_pill')}</span>`:''}</div>
+        <div class="card-installs">↑ <b>${fmt(p.installs)}</b> ${t('installs_lbl')}</div>
+      </div>
+    </div>
+    <div class="card-desc">${p.desc}</div>
+    <div>
+      <span class="cat-tag" style="background:${cat.color}12;border-color:${cat.color}30;color:${cat.color}">${cat.icon} ${cat.name}</span>
+    </div>
+    <div class="install-block">
+      <div class="install-top">
+        <div class="terminal-dots">
+          <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+        </div>
+        <div class="install-cmd-wrap">
+          <span class="terminal-prompt">$</span>
+          <span class="install-cmd">${cmd}</span>
+        </div>
+        <button class="add-btn${cart.has(p.name)?' in-cart':''}" onclick="toggleCart('${p.name}')">
+          ${cart.has(p.name)?t('added_btn'):t('add_btn')}
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── CART ──
+const cart = new Set();
+
+function toggleCart(name){
+  if(cart.has(name)){cart.delete(name);}else{cart.add(name);}
+  // update card in DOM without full re-render
+  const card=document.querySelector(`.plugin-card[data-plugin="${name}"]`);
+  if(card){
+    card.classList.toggle('in-cart',cart.has(name));
+    const btn=card.querySelector('.add-btn');
+    if(btn){
+      btn.classList.toggle('in-cart',cart.has(name));
+      btn.textContent=cart.has(name)?'✓ adicionado':'+ adicionar';
+    }
+  }
+  updateCartPanel();
+}
+
+function updateCartPanel(){
+  const chips=document.getElementById('cart-chips');
+  const badge=document.getElementById('cart-count-badge');
+  const status=document.getElementById('cart-status');
+  const clearBtn=document.getElementById('cart-clear-btn');
+  const copyBtn=document.getElementById('cart-copy-btn');
+  const n=cart.size;
+  const empty=n===0;
+  status.style.display=empty?'':'none';
+  status.textContent=t('cart_empty');
+  badge.style.display=empty?'none':'';
+  clearBtn.style.display=empty?'none':'';
+  clearBtn.textContent=t('cart_clear');
+  copyBtn.style.display=empty?'none':'';
+  if(!copyBtn.classList.contains('copied'))copyBtn.textContent=t('cart_copy');
+  badge.textContent=n;
+  chips.innerHTML=empty?'':([...cart].map(name=>`
+    <div class="cart-chip">
+      <span>${name}</span>
+      <button class="cart-chip-x" onclick="toggleCart('${name}')" title="Remover">×</button>
+    </div>`).join(''));
+}
+
+function clearCart(){
+  [...cart].forEach(name=>{
+    const card=document.querySelector(`.plugin-card[data-plugin="${name}"]`);
+    if(card){
+      card.classList.remove('in-cart');
+      const btn=card.querySelector('.add-btn');
+      if(btn){btn.classList.remove('in-cart');btn.textContent='+ adicionar';}
+    }
+  });
+  cart.clear();
+  updateCartPanel();
+}
+
+function copyCart(){
+  const cmds=[...cart].map(nm=>`claude plugin install ${nm}@claude-plugins-official`).join('\n');
+  const n=cart.size;
+  const onSuccess=()=>{
+    const btn=document.getElementById('cart-copy-btn');
+    btn.textContent=t('cart_copied',n);
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent=t('cart_copy');btn.classList.remove('copied');},2800);
+    showToast(t('toast_copied',n));
+  };
+  // clipboard API só funciona em HTTPS/localhost — fallback para file://
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(cmds).then(onSuccess).catch(()=>showFallback(cmds));
+  } else {
+    // fallback: execCommand (funciona em file://)
+    const ta=document.createElement('textarea');
+    ta.value=cmds;Object.assign(ta.style,{position:'fixed',top:'-9999px',left:'-9999px'});
+    document.body.appendChild(ta);ta.select();
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    if(ok){onSuccess();}else{showFallback(cmds);}
+  }
+}
+
+function showFallback(cmds){
+  // cria modal com textarea para o usuário copiar manualmente
+  let modal=document.getElementById('copy-modal');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='copy-modal';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(10,15,35,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(6px)';
+    modal.innerHTML=`
+      <div style="background:#fff;border-radius:16px;padding:28px;max-width:560px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,.3)">
+        <div style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:16px;color:#1a2040;margin-bottom:6px">${t('modal_title')}</div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#7080a8;margin-bottom:14px">${t('modal_hint')}</div>
+        <textarea id="copy-modal-ta" readonly style="width:100%;height:160px;font-family:'JetBrains Mono',monospace;font-size:11px;background:#0f1629;color:#a8c4ff;border:none;border-radius:10px;padding:14px;resize:none;outline:none;line-height:1.8"></textarea>
+        <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+          <button onclick="document.getElementById('copy-modal').remove()" style="font-family:'DM Sans',sans-serif;font-size:13px;background:none;border:1.5px solid #dde3f4;border-radius:8px;padding:8px 18px;cursor:pointer;color:#7080a8">${t('modal_close')}</button>
+          <button onclick="const ta=document.getElementById('copy-modal-ta');ta.select();document.execCommand('copy');this.textContent='✓'" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;background:#4f6ef7;border:none;border-radius:8px;padding:8px 18px;cursor:pointer;color:#fff">${t('modal_copy')}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+  }
+  const ta=document.getElementById('copy-modal-ta');
+  ta.value=cmds;
+  setTimeout(()=>{ta.focus();ta.select();},50);
+}
+
+function applyCartState(){
+  cart.forEach(name=>{
+    const card=document.querySelector(`.plugin-card[data-plugin="${name}"]`);
+    if(card){
+      card.classList.add('in-cart');
+      const btn=card.querySelector('.add-btn');
+      if(btn){btn.classList.add('in-cart');btn.textContent='✓ adicionado';}
+    }
+  });
+}
+
+function buildSidebar(){
+  const nav=document.getElementById('sidebar-nav');
+  const counts={};
+  PLUGINS.forEach(p=>{counts[p.cat]=(counts[p.cat]||0)+1});
+  nav.innerHTML=`
+    <div class="nav-section">${t('nav_browse')}</div>
+    <a class="nav-item active" data-cat="all" href="#">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-label">${t('nav_all')}</span>
+      <span class="nav-count">${PLUGINS.length}</span>
+    </a>
+    <div class="nav-section" style="margin-top:6px">${t('nav_cats')}</div>
+    ${CATEGORIES.map(c=>`
+    <a class="nav-item" data-cat="${c.id}" href="#" style="--c:${c.color}">
+      <span class="nav-icon">${c.icon}</span>
+      <span class="nav-label">${c.name}</span>
+      <span class="nav-count">${counts[c.id]||0}</span>
+    </a>`).join('')}`;
+  nav.querySelectorAll('.nav-item').forEach(el=>{
+    const c=CATEGORIES.find(x=>x.id===el.dataset.cat);
+    el.addEventListener('mouseenter',()=>{if(!el.classList.contains('active'))el.style.color=c?.color||''});
+    el.addEventListener('mouseleave',()=>{if(!el.classList.contains('active'))el.style.color=''});
+    el.addEventListener('click',e=>{
+      e.preventDefault();
+      nav.querySelectorAll('.nav-item').forEach(x=>{x.classList.remove('active');x.style.color='';});
+      el.classList.add('active');
+      if(c)el.style.color=c.color;
+      currentCategory=el.dataset.cat;
+      currentSearch='';
+      document.getElementById('search-input').value='';
+      render();
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+}
+
+function render(){
+  const content=document.getElementById('content');
+  const empty=document.getElementById('empty');
+  const q=currentSearch.toLowerCase().trim();
+  let filtered=PLUGINS.filter(p=>{
+    if(currentCategory!=='all'&&p.cat!==currentCategory)return false;
+    if(q)return p.name.toLowerCase().includes(q)||p.desc.toLowerCase().includes(q);
+    return true;
+  });
+  if(currentSort==='installs')filtered.sort((a,b)=>b.installs-a.installs);
+  else filtered.sort((a,b)=>a.name.localeCompare(b.name));
+  document.getElementById('result-count').textContent=`${filtered.length} plugin${filtered.length!==1?'s':''}`;
+  document.getElementById('total-badge').textContent=`${PLUGINS.length} plugins`;
+  const statEl=document.getElementById('stat-total');
+  if(statEl)statEl.textContent=PLUGINS.length;
+  if(!filtered.length){content.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  if(currentCategory==='all'&&!q){
+    const grouped={};
+    CATEGORIES.forEach(c=>{grouped[c.id]=[]});
+    filtered.forEach(p=>{if(grouped[p.cat])grouped[p.cat].push(p)});
+    content.innerHTML=CATEGORIES.map(cat=>{
+      const ps=grouped[cat.id];
+      if(!ps||!ps.length)return'';
+      return`<div class="cat-section" id="s-${cat.id}">
+        <div class="cat-header">
+          <div class="cat-icon-wrap" style="background:${cat.color}14;border:1.5px solid ${cat.color}25">${cat.icon}</div>
+          <div><div class="cat-name">${cat.name}</div><div class="cat-desc">${getCatDesc(cat.id)}</div></div>
+          <div class="cat-pill" style="color:${cat.color};border-color:${cat.color}35;background:${cat.color}10">${t('cat_pill',ps.length)}</div>
+        </div>
+        <div class="plugin-grid">${ps.map(cardHtml).join('')}</div>
+      </div>`;
+    }).join('');
+  } else {
+    const cat=currentCategory!=='all'?getCat(currentCategory):null;
+    content.innerHTML=`<div class="cat-section">${cat?`
+      <div class="cat-header">
+        <div class="cat-icon-wrap" style="background:${cat.color}14;border:1.5px solid ${cat.color}25">${cat.icon}</div>
+        <div><div class="cat-name">${cat.name}</div><div class="cat-desc">${getCatDesc(cat.id)}</div></div>
+        <div class="cat-pill" style="color:${cat.color};border-color:${cat.color}35;background:${cat.color}10">${t('cat_pill',filtered.length)}</div>
+      </div>`:''}
+      <div class="plugin-grid">${filtered.map(cardHtml).join('')}</div>
+    </div>`;
+  }
+  applyCartState();
+}
+
+function getCatDesc(id){return TR[currentLang].cat_descs[id]||''}
+
+// ── SEARCH ──
+let searchTimer;
+document.getElementById('search-input').addEventListener('input',e=>{
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>{
+    currentSearch=e.target.value;
+    currentCategory='all';
+    document.querySelectorAll('.nav-item').forEach(x=>{x.classList.remove('active');x.style.color='';});
+    document.querySelector('.nav-item[data-cat="all"]').classList.add('active');
+    render();
+  },150);
+});
+document.getElementById('sort-select').addEventListener('change',e=>{currentSort=e.target.value;render();});
+
+// ── TOAST ──
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast'+(type?' '+type:'');
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ── AUTO CATEGORIZE ──
+function autoCategory(name,desc){
+  const t=(name+' '+desc).toLowerCase();
+  if(/-lsp$/.test(name)||/language server/.test(t))return'lsp';
+  if(/playwright|chrome.devtools|e2e test/.test(t))return'testing';
+  if(/github|gitlab|buildkite|teamcity|incident.manag|pagerduty/.test(t))return'devops';
+  if(/\baws\b|\bazure\b|cloudflare|vercel|netlify|railway|terraform|serverless|deploy.on/.test(t))return'cloud';
+  if(/database|postgres|mongodb|\bsql\b|\bredis\b|vector.search|supabase|prisma|clickhouse|pinecone|cockroach|duckdb/.test(t))return'database';
+  if(/security|sast|dast|vulnerab|secret.scan|compliance|semgrep|aikido|zscaler|crowdstrike/.test(t))return'security';
+  if(/figma|design.tool|image.edit|video.gen|cloudinary|runway|miro/.test(t))return'design';
+  if(/analytics|monitor|datadog|sentry|posthog|amplitude|telemetry|fullstory/.test(t))return'analytics';
+  if(/slack|telegram|discord|imessage|zoom\b|twilio|email.send|resend\b/.test(t))return'comms';
+  if(/linear\b|jira|notion\b|asana\b|issue.track|sprint|mintlify/.test(t))return'pm';
+  if(/stripe|payment|billing|fintech|mercadopago|subscription|revenuecat/.test(t))return'payments';
+  if(/huggingface|machine.learn|llm|model.train|together.ai|pydantic.ai/.test(t))return'ai';
+  if(/scraping|crawl|web.search|api.lifecycle|postman|graphql|greptile|sourcegraph|zoominfo/.test(t))return'webdata';
+  if(/\bsap\b|servicenow|oracle\b|salesforce|netsuite|\berp\b|ui5/.test(t))return'enterprise';
+  if(/shopify|wordpress|wix\b|ecommerce|\bcms\b|sanity\b/.test(t))return'ecommerce';
+  if(/\bauth\b|\bsso\b|oauth|oidc|authentication/.test(t))return'auth';
+  if(/mobile|react.native|expo\b|ios\b|android/.test(t))return'mobile';
+  if(/airflow|etl|data.engineer|warehouse|dbt\b|spark\b|snowflake/.test(t))return'dataeng';
+  return'utils';
+}
+
+// ── SEEN PLUGINS (persiste entre reloads para não re-anunciar o mesmo plugin) ──
+const seenPlugins = new Set([
+  ...PLUGINS.map(p=>p.name),
+  ...JSON.parse(localStorage.getItem('cc-seen-plugins')||'[]')
+]);
+
+// ── UPDATE FROM GITHUB ──
+async function updateFromGitHub(){
+  const btn=document.getElementById('update-btn');
+  const icon=document.getElementById('update-icon');
+  btn.classList.add('loading');icon.className='spin';icon.textContent='↻';
+  try{
+    const res=await fetch('https://raw.githubusercontent.com/anthropics/claude-plugins-official/main/.claude-plugin/marketplace.json',{cache:'no-cache'});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const remote=data.plugins||[];
+    let added=0,newNames=[];
+    remote.forEach(rp=>{
+      if(!seenPlugins.has(rp.name)){
+        PLUGINS.push({name:rp.name,cat:autoCategory(rp.name,rp.description||''),installs:rp.installCount||0,icon:'🔌',desc:rp.description||'Plugin disponível no marketplace.',isNew:true});
+        seenPlugins.add(rp.name);
+        newNames.push(rp.name);
+        added++;
+      } else {
+        const ex=PLUGINS.find(p=>p.name===rp.name);
+        if(ex&&rp.description)ex.desc=rp.description;
+      }
+    });
+    // salva lista de vistos para próximas sessões
+    localStorage.setItem('cc-seen-plugins',JSON.stringify([...seenPlugins]));
+    const ts=new Date().toLocaleString('pt-BR');
+    localStorage.setItem('cc-plugins-ts',ts);
+    showLastUpdated(ts);
+    btn.classList.remove('loading');btn.classList.add('ok');
+    icon.className='';icon.textContent='✓';
+    setTimeout(()=>{btn.classList.remove('ok');icon.textContent='↻';},3000);
+    if(added>0){
+      // volta para "todos" para os novos ficarem visíveis
+      currentCategory='all';
+      currentSearch='';
+      document.getElementById('search-input').value='';
+      document.querySelectorAll('.nav-item').forEach(x=>{x.classList.remove('active');x.style.color='';});
+      const allItem=document.querySelector('.nav-item[data-cat="all"]');
+      if(allItem)allItem.classList.add('active');
+      buildSidebar();
+      render();
+      // rola até o primeiro plugin novo e pisca o card
+      setTimeout(()=>{
+        const firstNew=document.querySelector('.new-pill');
+        if(firstNew){
+          const card=firstNew.closest('.plugin-card');
+          if(card){
+            card.scrollIntoView({behavior:'smooth',block:'center'});
+            card.style.outline='2px solid #4f6ef7';
+            card.style.outlineOffset='3px';
+            setTimeout(()=>{card.style.outline='';card.style.outlineOffset='';},2200);
+          }
+        }
+      },200);
+      showToast(t('update_new',added,newNames[0]),'new');
+    } else {
+      showToast(t('update_ok',PLUGINS.length));
+    }
+  }catch(err){
+    btn.classList.remove('loading');icon.className='';icon.textContent='↻';
+    showToast(t('update_err',err.message));
+  }
+}
+
+function showLastUpdated(ts){
+  const bar=document.getElementById('last-updated-bar');
+  const txt=document.getElementById('last-updated-text');
+  if(bar&&txt){bar.style.display='flex';txt.textContent=t('last_checked',ts);}
+}
+
+window.addEventListener('scroll',()=>{
+  document.getElementById('top-btn').classList.toggle('visible',window.scrollY>400);
+});
+
+// aplica língua salva
+document.documentElement.lang=currentLang==='pt'?'pt-BR':'en';
+document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===currentLang));
+
+const savedTs=localStorage.getItem('cc-plugins-ts');
+if(savedTs)setTimeout(()=>showLastUpdated(savedTs),200);
+
+buildSidebar();
+render();
+applyTranslations();
+</script>
+</body>
+</html>
