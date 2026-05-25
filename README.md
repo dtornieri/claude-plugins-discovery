@@ -1,30 +1,28 @@
-# Claude Plugin Discovery
+# Claude Discovery
 
-Diretório navegável dos 203 plugins oficiais do [Claude Code](https://claude.ai/code) — marketplace `claude-plugins-official`.
+Single-file HTML para Claude Code — plugins, servidores MCP, mapa de conversas. Tudo no navegador.
 
-**[→ Abrir o diretório](https://dtornieri.github.io/claude-plugins-discovery)**
+🔗 https://dtornieri.github.io/claude-plugins-discovery/
 
-## O que é
+## Funcionalidades
 
-Página HTML estática que permite:
+- **Marketplace navegável dos 203 plugins do Claude Code**, com sincronização automática via GitHub Actions contra o repositório oficial da Anthropic.
 
-- Navegar e buscar plugins por categoria
-- Selecionar múltiplos plugins e copiar todos os comandos de instalação de uma vez
-- Verificar se há plugins novos direto do marketplace do Anthropic
-- Interface em **PT-BR** e **EN**
+- **Catálogo público dos 30 servidores MCP**, com favoritos persistidos no `localStorage` e deep-link de instalação em um clique.
 
-## Como instalar um plugin
+- **Mapa das conversas do Claude** a partir do export local que cada pessoa carrega: categorização automática por tema, heatmap diário, timeline cronológica, busca textual.
 
-```bash
-claude plugin install <nome>@claude-plugins-official
-```
+- **Grafo interativo de relações entre conversas**, com clusters por categoria e cross-links que mostram quando temas distintos se tocam.
 
-## Uso local
+- **IA semântica (opcional):** um botão baixa um modelo de embeddings multilíngue (~120MB, cache do navegador, uma vez só), calcula o vetor de cada conversa local e troca o critério de cross-link de "palavras compartilhadas" para "similaridade real entre temas". Tudo rodando no navegador.
 
-Baixe o `index.html` e abra no navegador — funciona sem servidor.
+## Arquitetura
 
-## Créditos
+Sem backend, sem banco, sem login. Nada sobe para servidor. Quem quiser hospedar para outras pessoas serve o HTML em qualquer lugar — cada visitante carrega o próprio export.
 
-Curado por **Daniel Tornieri** · [LinkedIn](https://www.linkedin.com/in/daniel-tornieri-09639813/)
+Versão atual: **2.489 linhas. Um arquivo só.**
 
-Dados: [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official)
+## Links
+
+- **Demo:** https://dtornieri.github.io/claude-plugins-discovery/
+- **Repositório:** https://github.com/dtornieri/claude-plugins-discovery
